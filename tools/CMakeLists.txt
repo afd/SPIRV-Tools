@@ -62,8 +62,14 @@ if (NOT ${SPIRV_SKIP_EXECUTABLES})
   endif()
 
   if(SPIRV_BUILD_FUZZER)
-    add_spvtools_tool(TARGET spirv-fuzz SRCS fuzz/fuzz.cpp util/cli_consumer.cpp LIBS SPIRV-Tools-fuzz ${SPIRV_TOOLS_FULL_VISIBILITY})
+    add_spvtools_tool(TARGET spirv-fuzz SRCS fuzz/fuzz.h fuzz/fuzz.cpp fuzz/fuzz_main.cpp util/cli_consumer.cpp LIBS SPIRV-Tools-fuzz ${SPIRV_TOOLS_FULL_VISIBILITY})
     set(SPIRV_INSTALL_TARGETS ${SPIRV_INSTALL_TARGETS} spirv-fuzz)
+    add_library(spirv-fuzz-hypothesis SHARED fuzz/fuzz.h fuzz/fuzz.cpp fuzz/fuzz_hypothesis.cpp util/cli_consumer.cpp)
+    target_link_libraries(spirv-fuzz-hypothesis PUBLIC SPIRV-Tools-fuzz ${SPIRV_TOOLS_FULL_VISIBILITY})
+    target_include_directories(spirv-fuzz-hypothesis PRIVATE
+            ${spirv-tools_SOURCE_DIR}
+            ${spirv-tools_BINARY_DIR}
+            )
   endif(SPIRV_BUILD_FUZZER)
 
   if(ENABLE_SPIRV_TOOLS_INSTALL)

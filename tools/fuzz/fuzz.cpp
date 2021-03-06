@@ -34,9 +34,12 @@
 #include "source/spirv_fuzzer_options.h"
 #include "source/util/make_unique.h"
 #include "source/util/string_utils.h"
+#include "tools/fuzz/fuzz.h"
 #include "tools/io.h"
 #include "tools/util/cli_consumer.h"
 
+namespace spvtools {
+namespace fuzz {
 namespace {
 
 // Check that the std::system function can actually be used.
@@ -550,6 +553,7 @@ bool Fuzz(const spv_target_env& target_env,
           const spvtools::fuzz::protobufs::FactSequence& initial_facts,
           const std::string& donors,
           spvtools::fuzz::RepeatedPassStrategy repeated_pass_strategy,
+          std::unique_ptr<RandomGenerator> random_generator,
           std::vector<uint32_t>* binary_out,
           spvtools::fuzz::protobufs::TransformationSequence*
               transformations_applied) {
@@ -586,11 +590,19 @@ bool Fuzz(const spv_target_env& target_env,
     return false;
   }
 
+  std::unique_ptr<RandomGenerator> random_generator_for_fuzzing;
+  if (random_generator == nullptr) {
+    random_generator_for_fuzzing = spvtools::MakeUnique<spvtools::fuzz::PseudoRandomGenerator>(
+        fuzzer_options->has_random_seed
+        ? fuzzer_options->random_seed
+        : static_cast<uint32_t>(std::random_device()()));
+  } else {
+    // TODO: complain if seed is set
+    random_generator_for_fuzzing = std::move(random_generator);
+  }
+
   auto fuzzer_context = spvtools::MakeUnique<spvtools::fuzz::FuzzerContext>(
-      spvtools::MakeUnique<spvtools::fuzz::PseudoRandomGenerator>(
-          fuzzer_options->has_random_seed
-              ? fuzzer_options->random_seed
-              : static_cast<uint32_t>(std::random_device()())),
+      std::move(random_generator_for_fuzzing),
       spvtools::fuzz::FuzzerContext::GetMinFreshId(ir_context.get()));
 
   auto transformation_context =
@@ -616,6 +628,8 @@ bool Fuzz(const spv_target_env& target_env,
   *transformations_applied = fuzzer.GetTransformationSequence();
   return true;
 }
+
+const auto kDefaultEnvironment = SPV_ENV_UNIVERSAL_1_3;
 
 }  // namespace
 
@@ -664,9 +678,7 @@ void DumpTransformationsJson(
   }
 }
 
-const auto kDefaultEnvironment = SPV_ENV_UNIVERSAL_1_3;
-
-int main(int argc, const char** argv) {
+int MainHelper(int argc, const char** argv, std::unique_ptr<RandomGenerator> random_generator) {
   std::string in_binary_file;
   std::string out_binary_file;
   std::string donors_file;
@@ -729,7 +741,9 @@ int main(int argc, const char** argv) {
       break;
     case FuzzActions::FUZZ:
       if (!Fuzz(target_env, fuzzer_options, validator_options, binary_in,
-                initial_facts, donors_file, repeated_pass_strategy, &binary_out,
+                initial_facts, donors_file, repeated_pass_strategy,
+                std::move(random_generator),
+                &binary_out,
                 &transformations_applied)) {
         return 1;
       }
@@ -802,3 +816,6 @@ int main(int argc, const char** argv) {
 
   return 0;
 }
+
+}  // namespace fuzz
+}  // namespace spvtools
