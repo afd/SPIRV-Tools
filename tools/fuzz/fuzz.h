@@ -22,7 +22,8 @@
 namespace spvtools {
 namespace fuzz {
 
-int MainHelper(int argc, const char** argv, std::unique_ptr<RandomGenerator> random_generator);
+int MainHelper(int argc, const char** argv,
+               std::unique_ptr<RandomGenerator> random_generator);
 
 }  // namespace fuzz
 }  // namespace spvtools

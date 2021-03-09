@@ -70,6 +70,7 @@ if (NOT ${SPIRV_SKIP_EXECUTABLES})
             ${spirv-tools_SOURCE_DIR}
             ${spirv-tools_BINARY_DIR}
             )
+    spvtools_default_compile_options(spirv-fuzz-hypothesis)
   endif(SPIRV_BUILD_FUZZER)
 
   if(ENABLE_SPIRV_TOOLS_INSTALL)

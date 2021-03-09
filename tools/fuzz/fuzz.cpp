@@ -592,10 +592,11 @@ bool Fuzz(const spv_target_env& target_env,
 
   std::unique_ptr<RandomGenerator> random_generator_for_fuzzing;
   if (random_generator == nullptr) {
-    random_generator_for_fuzzing = spvtools::MakeUnique<spvtools::fuzz::PseudoRandomGenerator>(
-        fuzzer_options->has_random_seed
-        ? fuzzer_options->random_seed
-        : static_cast<uint32_t>(std::random_device()()));
+    random_generator_for_fuzzing =
+        spvtools::MakeUnique<spvtools::fuzz::PseudoRandomGenerator>(
+            fuzzer_options->has_random_seed
+                ? fuzzer_options->random_seed
+                : static_cast<uint32_t>(std::random_device()()));
   } else {
     // TODO: complain if seed is set
     random_generator_for_fuzzing = std::move(random_generator);
@@ -678,7 +679,8 @@ void DumpTransformationsJson(
   }
 }
 
-int MainHelper(int argc, const char** argv, std::unique_ptr<RandomGenerator> random_generator) {
+int MainHelper(int argc, const char** argv,
+               std::unique_ptr<RandomGenerator> random_generator) {
   std::string in_binary_file;
   std::string out_binary_file;
   std::string donors_file;
@@ -742,8 +744,7 @@ int MainHelper(int argc, const char** argv, std::unique_ptr<RandomGenerator> ran
     case FuzzActions::FUZZ:
       if (!Fuzz(target_env, fuzzer_options, validator_options, binary_in,
                 initial_facts, donors_file, repeated_pass_strategy,
-                std::move(random_generator),
-                &binary_out,
+                std::move(random_generator), &binary_out,
                 &transformations_applied)) {
         return 1;
       }
