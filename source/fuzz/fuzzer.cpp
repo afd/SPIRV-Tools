@@ -329,6 +329,9 @@ Fuzzer::Result Fuzzer::Run(uint32_t num_of_transformations_to_apply) {
     // |num_of_transformations_to_apply|. This is not a problem for us since
     // these fuzzer passes are relatively simple yet might trigger some bugs.
     for (auto& pass : final_passes_) {
+      if (fuzzer_context_->RandomGeneratorIsExhausted()) {
+        break;
+      }
       if (!ApplyPassAndCheckValidity(pass.get())) {
         status = Status::kFuzzerPassLedToInvalidModule;
         break;
@@ -344,6 +347,9 @@ Fuzzer::Result Fuzzer::Run(uint32_t num_of_transformations_to_apply) {
 
 bool Fuzzer::ShouldContinueRepeatedPasses(
     bool continue_fuzzing_probabilistically) {
+  if (fuzzer_context_->RandomGeneratorIsExhausted()) {
+    return false;
+  }
   if (continue_fuzzing_probabilistically) {
     // If we have applied T transformations so far, and the limit on the number
     // of transformations to apply is L (where T < L), the chance that we will

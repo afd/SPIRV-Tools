@@ -40,6 +40,14 @@ class RandomGenerator {
 
   // Returns a double in the closed interval [0, 1]
   virtual double RandomDouble() = 0;
+
+  // Returns true if and only if the random generator's supply of data has been
+  // exhausted. For most generators this method should always return false. The
+  // method facilitates re-generating a test based on a mutated version of the
+  // random data that was used to generate a previous test, in which case it can
+  // return true to indicate that the data from the previous test has been used
+  // up.
+  virtual bool IsExhausted() const = 0;
 };
 
 }  // namespace fuzz

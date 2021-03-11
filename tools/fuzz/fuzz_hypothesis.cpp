@@ -78,6 +78,8 @@ class RandomGeneratorFromCallbacks : public spvtools::fuzz::RandomGenerator {
     return RandomDouble();
   }
 
+  bool IsExhausted() const override { return fallback != nullptr; }
+
  private:
   void InitializeFallback() {
     fallback = spvtools::MakeUnique<spvtools::fuzz::PseudoRandomGenerator>(0);

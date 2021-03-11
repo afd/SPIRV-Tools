@@ -450,6 +450,10 @@ class FuzzerContext {
     return go_deeper_in_constant_obfuscation_(depth, random_generator_.get());
   }
 
+  bool RandomGeneratorIsExhausted() const {
+    return random_generator_->IsExhausted();
+  }
+
  private:
   // The source of randomness.
   std::unique_ptr<RandomGenerator> random_generator_;

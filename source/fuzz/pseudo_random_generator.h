@@ -39,6 +39,8 @@ class PseudoRandomGenerator : public RandomGenerator {
 
   double RandomDouble() override;
 
+  bool IsExhausted() const override { return false; }
+
  private:
   std::mt19937 mt_;
 };
