@@ -34,9 +34,12 @@
 #include "source/spirv_fuzzer_options.h"
 #include "source/util/make_unique.h"
 #include "source/util/string_utils.h"
+#include "tools/fuzz/fuzz.h"
 #include "tools/io.h"
 #include "tools/util/cli_consumer.h"
 
+namespace spvtools {
+namespace fuzz {
 namespace {
 
 enum class FuzzingTarget { kSpirv, kWgsl };
@@ -643,6 +646,8 @@ bool Fuzz(const spv_target_env& target_env,
   return true;
 }
 
+const auto kDefaultEnvironment = SPV_ENV_UNIVERSAL_1_3;
+
 }  // namespace
 
 // Dumps |binary| to file |filename|. Useful for interactive debugging.
@@ -690,9 +695,7 @@ void DumpTransformationsJson(
   }
 }
 
-const auto kDefaultEnvironment = SPV_ENV_UNIVERSAL_1_3;
-
-int main(int argc, const char** argv) {
+int MainHelper(int argc, const char** argv) {
   std::string in_binary_file;
   std::string out_binary_file;
   std::string donors_file;
@@ -830,3 +833,6 @@ int main(int argc, const char** argv) {
 
   return 0;
 }
+
+}  // namespace fuzz
+}  // namespace spvtools
